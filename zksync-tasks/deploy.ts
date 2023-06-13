@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 import { deploySpongePoseidon, deployPoseidons } from "../core/lib/deploy_poseidons.zksync.util";
 import { defaultContractFile } from "./common";
-import { utils, Wallet } from "zksync-web3";
+import { utils, Wallet, Web3Provider, Provider } from "zksync-web3";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
 const fs = require("fs");
@@ -14,13 +14,12 @@ task("deploy", "Deploy all smart contract")
 .addParam("testTokenAddress", "test token address, default none", "")
 .addParam("contractFile", "[output] contract address", defaultContractFile)
 .setAction(async ({ testTokenAddress, contractFile }, hre) => {
-  // let [admin, _bob, deploy] = await ethers.getSigners();
   const { ethers } = hre;
 
   const admin = new Wallet(richWallets[0].privateKey)
   const deploy = new Wallet(richWallets[2].privateKey)
 
-  // const adminDeployer = new Deployer(hre, admin);
+  const adminDeployer = new Deployer(hre, admin);
 
   // const depositHandle = await adminDeployer.zkWallet.deposit({
   //   to: adminDeployer.zkWallet.address,
@@ -31,7 +30,7 @@ task("deploy", "Deploy all smart contract")
   // await depositHandle.wait();
 
   // @ts-ignore
-  let poseidonContracts = await deployPoseidons(admin, [2, 3, 6]);
+  let poseidonContracts = await deployPoseidons(adminDeployer, [2, 3, 6]);
   let contractJson = new Map<string, string>();
 
   console.log("Using account ", admin.address);
