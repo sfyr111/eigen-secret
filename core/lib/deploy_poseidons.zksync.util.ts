@@ -1,8 +1,9 @@
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
 const { poseidonContract } = require("circomlibjs");
-import { Contract } from "ethers";
+import { Contract, ethers } from "ethers";
 import * as zk from "zksync-web3";
+import { Signer, Wallet } from "zksync-web3";
 
 export async function deploySpongePoseidon(ethers: any, poseidon6ContractAddress: string): Promise<Contract> {
   const SpongePoseidonFactory = await ethers.getContractFactory("SpongePoseidon", {
@@ -30,9 +31,11 @@ export async function deployPoseidons(
   });
 
   const deployPoseidon = async (params: number) => {
+    console.log(params)
     const abi = poseidonContract.generateABI(params);
     const code = poseidonContract.createCode(params);
-    const PoseidonElements = new zk.ContractFactory(abi, code, deployer.zkWallet, deployer.deploymentType);
+    console.log(code.length)
+    const PoseidonElements = new ethers.ContractFactory(abi, code, deployer.zkWallet._signerL2());
     const poseidonElements = await PoseidonElements.deploy();
     await poseidonElements.deployed();
     console.log(`Poseidon${params}Elements deployed to:`, poseidonElements.address);

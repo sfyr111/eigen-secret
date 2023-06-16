@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 import { deploySpongePoseidon, deployPoseidons } from "../core/lib/deploy_poseidons.zksync.util";
 import { defaultContractFile } from "./common";
-import { utils, Wallet, Web3Provider, Provider } from "zksync-web3";
+import zk, { utils, Wallet, Web3Provider, Provider } from "zksync-web3";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
 const fs = require("fs");
@@ -19,15 +19,21 @@ task("deploy", "Deploy all smart contract")
   const admin = new Wallet(richWallets[0].privateKey)
   const deploy = new Wallet(richWallets[2].privateKey)
 
+  const provider = Provider.getDefaultProvider();
+  const signer = await provider.getSigner();
+  console.log(signer._address)
+  // console.log(await signer.getAddress())
+  // const signer = new ethers.Wallet('0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110', provider);
+
   const adminDeployer = new Deployer(hre, admin);
 
-  // const depositHandle = await adminDeployer.zkWallet.deposit({
-  //   to: adminDeployer.zkWallet.address,
-  //   token: utils.ETH_ADDRESS,
-  //   amount: ethers.BigNumber.from(100)
-  // });
+  const depositHandle = await adminDeployer.zkWallet.deposit({
+    to: adminDeployer.zkWallet.address,
+    token: utils.ETH_ADDRESS,
+    amount: ethers.BigNumber.from(10)
+  });
   // Wait until the deposit is processed on zkSync
-  // await depositHandle.wait();
+  await depositHandle.wait();
 
   // @ts-ignore
   let poseidonContracts = await deployPoseidons(adminDeployer, [2, 3, 6]);
